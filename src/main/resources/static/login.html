@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 / 注册 - 五子棋对战平台</title>
+    <style>
+        /* --- 全局样式 --- */
+        :root {
+            --primary-color: #4a90e2; /* 主题色 */
+            --light-primary-color: #eaf2fa;
+            --dark-text-color: #333;
+            --light-text-color: #f8f8f8;
+            --error-color: #e74c3c;
+            --success-color: #2ecc71;
+            --border-color: #ddd;
+            --background-color: #f4f7f6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--background-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: var(--dark-text-color);
+            /* 
+               TODO: 替换为你喜欢的背景图片
+               你可以去 unsplash.com 等网站寻找高质量的免费图片
+            */
+            background-image: url('https://images.unsplash.com/photo-1748257615880-6243d0d7422f?q=80&w=1786&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* --- 主容器样式 --- */
+        .container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .logo {
+            /* 
+                TODO: 在这里放置你的游戏Logo图片
+                例如: <img src="/pic/logo.png" alt="Gobang Logo" class="logo"> 
+            */
+            font-size: 2.5em;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .logo-subtitle {
+            margin-bottom: 30px;
+            color: #777;
+        }
+
+        /* --- Tab 切换样式 --- */
+        .tabs {
+            display: flex;
+            margin-bottom: 25px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .tab-link {
+            flex: 1;
+            padding: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #999;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-link.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+        
+        /* --- 表单内容样式 --- */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 15px 15px 15px 45px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px var(--light-primary-color);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--primary-color);
+            color: var(--light-text-color);
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background-color: #3a80d2;
+        }
+        
+        .submit-btn:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        /* --- 提示信息样式 --- */
+        .feedback-message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: 500;
+            display: none; /* 默认隐藏 */
+        }
+        
+        .feedback-message.error {
+            background-color: #fbecec;
+            color: var(--error-color);
+            display: block;
+        }
+        
+        .feedback-message.success {
+            background-color: #eafaf1;
+            color: var(--success-color);
+            display: block;
+        }
+        
+        .feedback-message.loading {
+            background-color: #f0f0f0;
+            color: #555;
+            display: block;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Logo -->
+        <div class="logo">五子棋</div>
+        <div class="logo-subtitle">在线对战平台</div>
+
+        <!-- Tab 切换 -->
+        <div class="tabs">
+            <div class="tab-link active" onclick="switchTab(event, 'login')">登录</div>
+            <div class="tab-link" onclick="switchTab(event, 'register')">注册</div>
+        </div>
+
+        <!-- 登录表单 -->
+        <div id="login" class="tab-content active">
+            <form id="login-form">
+                <div class="form-group">
+                    <span class="input-icon">👤</span>
+                    <input type="text" id="login-username" class="input-field" placeholder="用户名" required>
+                </div>
+                <div class="form-group">
+                    <span class="input-icon">🔒</span>
+                    <input type="password" id="login-password" class="input-field" placeholder="密码" required>
+                </div>
+                <button type="submit" class="submit-btn">登录</button>
+            </form>
+        </div>
+
+        <!-- 注册表单 -->
+        <div id="register" class="tab-content">
+            <form id="register-form">
+                <div class="form-group">
+                    <span class="input-icon">👤</span>
+                    <input type="text" id="register-username" class="input-field" placeholder="设置用户名" required>
+                </div>
+                <div class="form-group">
+                    <span class="input-icon">🔒</span>
+                    <input type="password" id="register-password" class="input-field" placeholder="设置密码" required>
+                </div>
+                <button type="submit" class="submit-btn">立即注册</button>
+            </form>
+        </div>
+        
+        <!-- 反馈信息区域 -->
+        <div id="feedback-message" class="feedback-message"></div>
+    </div>
+
+    <script>
+        // --- Tab 切换逻辑 ---
+        function switchTab(event, tabName) {
+            // 移除所有 tab 的 active 类
+            const tabLinks = document.querySelectorAll('.tab-link');
+            tabLinks.forEach(link => link.classList.remove('active'));
+
+            // 隐藏所有 tab 内容
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+
+            // 为当前点击的 tab 和对应内容添加 active 类
+            event.currentTarget.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+            
+            // 切换时清空提示信息
+            hideFeedback();
+        }
+
+        // --- 表单提交逻辑 ---
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const feedbackDiv = document.getElementById('feedback-message');
+        
+        // 登录处理
+        loginForm.addEventListener('submit', async function(event) {
+            event.preventDefault(); // 阻止表单默认提交
+            
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            
+            if (!username || !password) {
+                showFeedback('请输入用户名和密码', 'error');
+                return;
+            }
+
+            // 禁用按钮，显示加载中
+            const submitBtn = loginForm.querySelector('.submit-btn');
+            submitBtn.disabled = true;
+            showFeedback('正在登录...', 'loading');
+
+            try {
+                // 使用 URLSearchParams 来构建 form-data
+                const formData = new URLSearchParams();
+                formData.append('username', username);
+                formData.append('password', password);
+
+                // **注意:** 你的后端接口UserAPI使用的是`@NotBlank String username`，
+                // 这通常对应 `application/x-www-form-urlencoded` 或 `multipart/form-data`
+                // 而不是 `application/json`。所以我们使用 fetch 的 `body: formData`。
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: formData,
+                });
+
+                const result = await response.json();
+                
+                // 根据你的 HttpResult 结构进行判断
+                if (result.resultCode === 'SUCCESS') {
+                    showFeedback('登录成功！正在跳转到游戏大厅...', 'success');
+                    // 登录成功后，跳转到游戏大厅页面
+                    setTimeout(() => {
+                        window.location.href = '/index.html'; // TODO: 确保你的大厅页面是这个路径
+                    }, 1500);
+                } else {
+                    // 登录失败，显示后端返回的错误信息
+                    showFeedback(result.errMsg || '登录失败，请重试', 'error');
+                    submitBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showFeedback('网络请求失败，请检查你的网络连接', 'error');
+                submitBtn.disabled = false;
+            }
+        });
+
+        // 注册处理
+        registerForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('register-username').value;
+            const password = document.getElementById('register-password').value;
+
+            if (!username || !password) {
+                showFeedback('用户名和密码不能为空', 'error');
+                return;
+            }
+            if (password.length < 6) {
+                showFeedback('密码长度不能少于6位', 'error');
+                return;
+            }
+            
+            const submitBtn = registerForm.querySelector('.submit-btn');
+            submitBtn.disabled = true;
+            showFeedback('正在注册...', 'loading');
+
+            try {
+                const formData = new URLSearchParams();
+                formData.append('username', username);
+                formData.append('password', password);
+
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: formData,
+                });
+
+                const result = await response.json();
+                
+                if (result.resultCode === 'SUCCESS') {
+                    showFeedback('注册成功！正在自动登录并跳转...', 'success');
+                    // 注册成功，自动跳转
+                    setTimeout(() => {
+                        window.location.href = '/index.html'; // TODO: 确保你的大厅页面是这个路径
+                    }, 1500);
+                } else {
+                    showFeedback(result.errMsg || '注册失败，请重试', 'error');
+                    submitBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Register error:', error);
+                showFeedback('网络请求失败，请检查服务是否正常', 'error');
+                submitBtn.disabled = false;
+            }
+        });
+
+        // --- 反馈信息显示/隐藏辅助函数 ---
+        function showFeedback(message, type = 'error') {
+            feedbackDiv.textContent = message;
+            feedbackDiv.className = 'feedback-message ' + type;
+        }
+        
+        function hideFeedback() {
+            feedbackDiv.textContent = '';
+            feedbackDiv.className = 'feedback-message';
+        }
+
+    </script>
+</body>
+</html>

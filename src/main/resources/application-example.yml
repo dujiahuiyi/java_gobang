@@ -1,0 +1,22 @@
+spring:
+  application:
+    name:java_gobang
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/java_gobang?characterEncoding=utf8&useSSL=false&serverTimezone=GMT%2B8
+    username: root
+    password: YOUR_DATABASE_PASSWORD_HERE
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+mybatis:
+  mapper-locations: classpath:mapper/**Mapper.xml
+
+logging:
+  pattern:
+    console: "[%-5level] - %msg%n"
+  file:
+    name: spring-gobang.log
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

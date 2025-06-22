@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏大厅 - 五子棋对战平台</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --dark-text-color: #333;
+            --light-text-color: #f8f8f8;
+            --border-color: #e0e0e0;
+            --background-color: #f4f7f6;
+            --panel-bg-color: #ffffff;
+            --win-color: #27ae60;
+            --loss-color: #c0392b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 20px;
+            color: var(--dark-text-color);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .hall-container {
+            display: grid;
+            grid-template-columns: 280px 1fr 280px;
+            gap: 25px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .panel {
+            background-color: var(--panel-bg-color);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        /* --- 左侧：用户信息面板 --- */
+        .user-profile {
+            text-align: center;
+        }
+
+        .user-profile .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: #ccc;
+            margin: 0 auto 15px;
+            /* TODO: 用户头像图片，可以通过JS动态设置 */
+            background-image: url('https://i.pravatar.cc/100'); /* 这是一个随机头像占位符 */
+            background-size: cover;
+            border: 4px solid var(--primary-color);
+        }
+
+        .user-profile .username {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .user-profile .score {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        .user-profile .score::before {
+            content: '🏆 ';
+        }
+
+        .stats {
+            text-align: left;
+            margin-bottom: 25px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 16px;
+        }
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+        .stat-item .value {
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #e74c3c;
+            color: var(--light-text-color);
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+
+        /* --- 中心：匹配区域 --- */
+        .match-area {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 500px; /* 给一个固定高度以保持布局稳定 */
+        }
+        
+        .match-btn {
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            border: 8px solid var(--primary-color);
+            background-color: var(--panel-bg-color);
+            color: var(--primary-color);
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            transition: all 0.4s ease;
+            box-shadow: 0 0 0 0 rgba(74, 144, 226, 0.7);
+        }
+
+        .match-btn:not(.matching):hover {
+            transform: scale(1.05);
+            background-color: var(--primary-color);
+            color: var(--light-text-color);
+        }
+
+        .match-btn.matching {
+            color: #fff;
+            background-color: #95a5a6;
+            border-color: #7f8c8d;
+            cursor: pointer; /* 仍然可点击以取消 */
+            animation: pulse 1.5s infinite;
+        }
+        .match-btn.matching:hover {
+            background-color: #e74c3c; /* 鼠标悬停时变为取消的红色 */
+            border-color: #c0392b;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(74, 144, 226, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 20px rgba(74, 144, 226, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(74, 144, 226, 0);
+            }
+        }
+
+        .match-status {
+            margin-top: 25px;
+            font-size: 18px;
+            color: #666;
+            height: 25px; /* 占位防止布局抖动 */
+        }
+
+        /* --- 右侧：排行榜 --- */
+        .leaderboard h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+        .leaderboard-list {
+            list-style: none;
+            padding: 0;
+        }
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 5px;
+            border-radius: 6px;
+            transition: background-color 0.2s ease;
+        }
+        .leaderboard-item:not(:last-child) {
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .leaderboard-item:hover {
+            background-color: #f9f9f9;
+        }
+        .rank {
+            font-weight: bold;
+            font-size: 18px;
+            width: 40px;
+            text-align: center;
+            color: #999;
+        }
+        .rank.top-1 { color: #ffd700; }
+        .rank.top-2 { color: #c0c0c0; }
+        .rank.top-3 { color: #cd7f32; }
+
+        .player-name {
+            flex-grow: 1;
+            padding-left: 10px;
+        }
+        .player-score {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        /* 响应式布局 */
+        @media (max-width: 992px) {
+            .hall-container {
+                grid-template-columns: 1fr;
+            }
+            .leaderboard {
+                display: none; /* 在小屏幕上可以先隐藏排行榜 */
+            }
+            .match-area {
+                height: auto;
+                padding: 40px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="hall-container">
+    <!-- 左侧：用户信息 -->
+    <div class="panel user-profile">
+        <div class="avatar" id="user-avatar"></div>
+        <div class="username" id="user-username">加载中...</div>
+        <div class="score" id="user-score">--</div>
+        <div class="stats">
+            <div class="stat-item">
+                <span>总场次</span>
+                <span class="value" id="user-total-count">--</span>
+            </div>
+            <div class="stat-item">
+                <span>胜场</span>
+                <span class="value" id="user-win-count">--</span>
+            </div>
+            <div class="stat-item">
+                <span>胜率</span>
+                <span class="value" id="user-win-rate">--</span>
+            </div>
+        </div>
+        <button id="logout-btn" class="logout-btn">退出登录</button>
+    </div>
+
+    <!-- 中心：匹配区域 -->
+    <div class="panel match-area">
+        <div id="match-btn" class="match-btn">开始匹配</div>
+        <div id="match-status" class="match-status">点击按钮，寻找对手</div>
+    </div>
+
+    <!-- 右侧：排行榜 (此为静态示例) -->
+    <div class="panel leaderboard">
+        <h3>🏆 天梯排行榜 🏆</h3>
+        <ul class="leaderboard-list">
+            <!-- JS可以动态生成此列表 -->
+            <li class="leaderboard-item">
+                <span class="rank top-1">1</span>
+                <span class="player-name">棋圣Alpha</span>
+                <span class="player-score">3500</span>
+            </li>
+            <li class="leaderboard-item">
+                <span class="rank top-2">2</span>
+                <span class="player-name">九段棋手</span>
+                <span class="player-score">3210</span>
+            </li>
+            <li class="leaderboard-item">
+                <span class="rank top-3">3</span>
+                <span class="player-name">隔壁王叔叔</span>
+                <span class="player-score">3150</span>
+            </li>
+            <li class="leaderboard-item">
+                <span class="rank">4</span>
+                <span class="player-name">常胜将军</span>
+                <span class="player-score">2800</span>
+            </li>
+            <li class="leaderboard-item">
+                <span class="rank">5</span>
+                <span class="player-name">小萌新</span>
+                <span class="player-score">2750</span>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- DOM 元素获取 ---
+    const usernameElem = document.getElementById('user-username');
+    const scoreElem = document.getElementById('user-score');
+    const totalCountElem = document.getElementById('user-total-count');
+    const winCountElem = document.getElementById('user-win-count');
+    const winRateElem = document.getElementById('user-win-rate');
+
+    const matchBtn = document.getElementById('match-btn');
+    const matchStatus = document.getElementById('match-status');
+    
+    const logoutBtn = document.getElementById('logout-btn'); // 获取退出按钮
+
+    let webSocket = null;
+    let isMatching = false;
+    
+    // --- 1. 获取并填充用户信息 ---
+    async function fetchUserInfo() {
+        try {
+            const response = await fetch('/userInfo');
+            if (response.status === 401) {
+                // 用户未登录，跳转回登录页
+                alert('您尚未登录，请先登录！');
+                window.location.href = '/login.html';
+                return;
+            }
+            const result = await response.json();
+            
+            if (result.resultCode === 'SUCCESS') {
+                const user = result.date;
+                usernameElem.textContent = user.username;
+                scoreElem.textContent = user.score;
+                totalCountElem.textContent = user.totalCount;
+                winCountElem.textContent = user.winCount;
+                const winRate = user.totalCount > 0 ? ((user.winCount / user.totalCount) * 100).toFixed(1) : 0;
+                winRateElem.textContent = `${winRate}%`;
+            } else {
+                throw new Error(result.errMsg || '获取用户信息失败');
+            }
+        } catch (error) {
+            console.error(error);
+            alert(error.message);
+            window.location.href = '/login.html'; // 出错也返回登录页
+        }
+    }
+
+    // --- 2. WebSocket 连接管理 ---
+    function connectWebSocket() {
+        // 使用 wss:// (加密) 或 ws:// (非加密)
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${protocol}//${window.location.host}/findMatch`;
+
+        webSocket = new WebSocket(wsUrl);
+
+        webSocket.onopen = () => {
+            console.log('WebSocket 连接成功！');
+            matchBtn.disabled = false;
+            matchStatus.textContent = '已连接到匹配服务器，准备就绪！';
+        };
+
+        webSocket.onmessage = (event) => {
+            const response = JSON.parse(event.data);
+            console.log('收到消息:', response);
+
+            // 根据你的 WebSocketResult 结构处理
+            if (response.code === 'SUCCESS' && response.data) {
+                handleSuccessMessage(response.data);
+            } else if (response.code === 'FAIL' && response.data) {
+                handleFailMessage(response.data);
+            }
+        };
+
+        webSocket.onclose = () => {
+            console.log('WebSocket 连接已关闭。');
+            // 可以在这里实现重连逻辑
+            matchStatus.textContent = '与服务器断开连接';
+            isMatching = false;
+            updateMatchButtonUI();
+        };
+
+        webSocket.onerror = (error) => {
+            console.error('WebSocket 错误:', error);
+            matchStatus.textContent = '连接错误！';
+        };
+    }
+    
+    function handleSuccessMessage(data) {
+        if (data.message === 'startMatch') {
+            isMatching = true;
+            updateMatchButtonUI();
+        } else if (data.message === 'stopMatch') {
+            isMatching = false;
+            updateMatchButtonUI();
+        } else if (data.message === 'matchSuccess') {
+            alert('匹配成功！即将进入对战房间！');
+            // 关键：跳转到游戏页面
+            window.location.href = '/game.html';
+        }
+    }
+
+    function handleFailMessage(data) {
+        alert(`操作失败: ${data.reason}`);
+        isMatching = false;
+        updateMatchButtonUI();
+    }
+    
+    // --- 3. 匹配按钮逻辑 ---
+    matchBtn.addEventListener('click', () => {
+        if (!webSocket || webSocket.readyState !== WebSocket.OPEN) {
+            alert('尚未连接到服务器，请稍后重试。');
+            return;
+        }
+
+        if (isMatching) {
+            // 取消匹配
+            webSocket.send(JSON.stringify({ message: 'stopMatch' }));
+        } else {
+            // 开始匹配
+            webSocket.send(JSON.stringify({ message: 'startMatch' }));
+        }
+    });
+
+    function updateMatchButtonUI() {
+        if (isMatching) {
+            matchBtn.classList.add('matching');
+            matchBtn.innerHTML = '匹配中...<br><small>点击取消</small>';
+            matchStatus.textContent = '正在为您寻找实力相当的对手...';
+        } else {
+            matchBtn.classList.remove('matching');
+            matchBtn.textContent = '开始匹配';
+            matchStatus.textContent = '点击按钮，寻找对手';
+        }
+    }
+    
+    // --- 4. 退出登录逻辑 (新添加的部分) ---
+    logoutBtn.addEventListener('click', () => {
+        if (confirm('您确定要退出登录吗？')) {
+            if (webSocket && webSocket.readyState === WebSocket.OPEN) {
+                webSocket.close();
+            }
+            window.location.href = '/login.html';
+        }
+    });
+
+    // --- 页面初始化 ---
+    async function init() {
+        await fetchUserInfo();
+        connectWebSocket();
+    }
+
+    init();
+});
+</script>
+</body>
+</html>
