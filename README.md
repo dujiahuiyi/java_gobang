@@ -11,20 +11,7 @@
 
 ## 📸 项目预览
 
-在这里放置一个项目的主要流程GIF动图，会非常吸引眼球！
-*(**提示**: 使用 [ScreenToGif](https://www.screentogif.com/) 或类似工具录制一个从登录、大厅匹配到开始对战的完整流程GIF，然后上传到仓库或图床，在这里引用)*
-
-![项目演示GIF](https://raw.githubusercontent.com/user-attachments/assets/b4614e21-0a6a-4d40-9f2d-74d3d81b2190.gif) 
-
-**(登录与注册)**
-![登录注册](https://raw.githubusercontent.com/user-attachments/assets/81c4e7ab-18e9-4e0d-b94f-f230b0800d92.png)
-
-**(游戏大厅)**
-![游戏大厅](https://raw.githubusercontent.com/user-attachments/assets/36b81313-2d2c-4734-b26a-9a997d5cc394.png)
-
-**(游戏对战)**
-![游戏对战](https://raw.githubusercontent.com/user-attachments/assets/516e9b25-0955-46b5-827c-652f1e405a8b.png)
-
+![项目演示GIF](https://github.com/dujiahuiyi/java_gobang/blob/main/demo.gif?raw=true)
 
 ## ✨ 主要功能
 
